@@ -1,50 +1,58 @@
 <template>
-  <a-row :wrap="false">
-    <a-col flex="200px">
-      <RouterLink to="/">
-        <div class="title-bar">
-          <img class="logo" src="../assets/logo.png" alt="logo" />
-          <div class="title">Rovy云图库</div>
+  <div id="globalHeader">
+    <a-row :wrap="false">
+      <a-col flex="200px">
+        <RouterLink to="/">
+          <div class="title-bar">
+            <img class="logo" src="../assets/logo.png" alt="logo" />
+            <div class="title">Rovy云图库</div>
+          </div>
+        </RouterLink>
+      </a-col>
+      <a-col flex="auto">
+        <a-menu
+          v-model:selectedKeys="current"
+          @click="doMenuClick"
+          mode="horizontal"
+          :items="items"
+        />
+      </a-col>
+      <a-col flex="120px">
+        <div class="user-login-status">
+          <div v-if="loginUserStore.loginUser.id">
+            <a-dropdown>
+              <ASpace>
+                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                {{ loginUserStore.loginUser.userName ?? '无名' }}
+              </ASpace>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
+                  </a-menu-item>
+                  <a-menu-item>
+                    <router-link to="/my_space">
+                      <UserOutlined />
+                      我的空间
+                    </router-link>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
+          <div v-else>
+            <a-button type="primary" href="/user/login">登录</a-button>
+          </div>
         </div>
-      </RouterLink>
-    </a-col>
-    <a-col flex="auto">
-      <a-menu
-        v-model:selectedKeys="current"
-        @click="doMenuClick"
-        mode="horizontal"
-        :items="items"
-      />
-    </a-col>
-    <a-col flex="120px">
-      <div class="user-login-status">
-        <div v-if="loginUserStore.loginUser.id">
-          <a-dropdown>
-            <ASpace>
-              <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-              {{ loginUserStore.loginUser.userName ?? '无名' }}
-            </ASpace>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item @click="doLogout">
-                  <LogoutOutlined />
-                  退出登录
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-        </div>
-        <div v-else>
-          <a-button type="primary" href="/user/login">登录</a-button>
-        </div>
-      </div>
-    </a-col>
-  </a-row>
+      </a-col>
+    </a-row>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, h, ref } from 'vue'
-import { HomeOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons-vue'
 import { type MenuProps, message } from 'ant-design-vue'
 
 import { useRouter } from 'vue-router'
@@ -76,14 +84,12 @@ const doLogout = async () => {
   }
 }
 
-
 // 当前选中菜单
 const current = ref<string[]>([])
 // 监听路由变化，更新当前选中菜单
 router.afterEach((to, from, next) => {
   current.value = [to.path]
 })
-
 
 // 菜单列表
 const originItems = [
@@ -112,7 +118,12 @@ const originItems = [
     key: '/admin/pictureManage',
     label: '图片管理',
     title: '图片管理',
-  }
+  },
+  {
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
+  },
 ]
 
 // 过滤菜单项
@@ -120,7 +131,7 @@ const filterMenus = (menus = [] as MenuProps['items']) => {
   return menus?.filter((menu) => {
     if (menu.key.startsWith('/admin')) {
       const loginUser = loginUserStore.loginUser
-      if (!loginUser || loginUser.userRole !== "admin") {
+      if (!loginUser || loginUser.userRole !== 'admin') {
         return false
       }
     }
@@ -130,7 +141,6 @@ const filterMenus = (menus = [] as MenuProps['items']) => {
 
 // 展示在菜单的路由数组
 const items = computed<MenuProps['items']>(() => filterMenus(originItems))
-
 </script>
 
 <style scoped>
