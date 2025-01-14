@@ -28,7 +28,7 @@
         <a-button type="primary" html-type="submit">搜索</a-button>
       </a-form-item>
     </a-form>
-
+    <div style="margin-top: 16px" />
     <!--  用户表格  -->
     <a-table
       :columns="columns"
